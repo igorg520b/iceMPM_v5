@@ -1,0 +1,50 @@
+{
+"RuntimeDirectory": "/mnt/jsps_work/_simulation_Aug/_runtime2026", 
+"ProjectName":"nares_2026_10k",
+"ParentConfig": "/home/s2/Projects-CUDA/iceMPM_v5/_input_data/base_config.json",
+
+"ImageColor":"2026_10k.png",
+"ImageIceMask": "ice_mask.png",
+"ImageThicknessMask": "thickness_data_may2026_v.png",
+
+"PreSimulationStartDate": "2026-05-01",
+"SimulationEndDate": "2026-05-31",
+
+"SimulationEndTime": 518400,
+
+"CARRA1Data": ["/home/s2/Projects-CUDA/_netcdf_2026/carra1_202605.nc"],
+"GLO12Data": "/home/s2/Projects-CUDA/_netcdf_2026/glo12v4_kane_basin_currents.nc",
+"GLO12Tides": "/home/s2/Projects-CUDA/_netcdf_2026/glo12v4_kane_basin_tidal_currents.nc",
+"GLO12ThicknessData": "/home/s2/Projects-CUDA/_netcdf_2026/glo12v4_kane_basin_ice_thickness.nc",
+
+"PROJ_RESIZE_FACTOR": 2.0,
+
+"SimulationStartDate": "2026-05-25T00:00:00",
+
+"Snapshot": "f00000.h5",
+"LoadSnapshotForSpinUp":"f00000.h5",
+
+"IceStrengthFactor": 0.45,
+"IceStrengthFactorTensile": 0.33,
+"IceStrengthFactorCompressive": 2.0,
+"IceStrengthFactorCompressiveYield": 1.0,
+
+"TauInv": 0,
+"IceFractureAngle":0,
+"IceYieldFrictionAngle":0,
+"Cf": 0.9,
+"Cf_residual": 0.1,
+"GammaStar": 0.15,
+"DP_phi": 57,
+"DP_threshold_p": -1000, 
+
+"InitialTimeStep": 0.096789,
+
+"SaveAnimationAsJPG":true,
+"JPG_OffsetX":769,
+"JPG_OffsetY":753,
+"JPG_Crop_Width":7056,
+"JPG_Crop_Height":3969,
+
+"nPartitions": 1
+}

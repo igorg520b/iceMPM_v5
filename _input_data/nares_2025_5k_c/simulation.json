@@ -1,0 +1,25 @@
+{
+"ProjectName":"nares_2025_5k_c",
+"ParentConfig": "/home/s2/Projects-CUDA/iceMPM_v5/_input_data/base_config_2025.json",
+
+"ImageColor":"../nares_2025_5k/color_2025_5k.png",
+"ImageIceMask":"../nares_2025_10k/ice.png",
+"ImageThicknessMask":"../nares_2025_10k/thickness.png",
+
+"PROJ_RESIZE_FACTOR": 4.0,
+
+"SimulationStartDate": "2025-05-29T00:00:00",
+
+"Snapshot": "f00000.h5",
+
+"UseLiveIceStrength": true,
+"IceStrengthFactor": 0.1,
+"IceStrengthFactorTensile": 0.08,
+"IceStrengthFactorCompressive": 0.38,
+"IceStrengthFactorCompressiveYield": 0.2,  
+
+"InitialTimeStep": 0.193578,
+"SnapshotPeriod": 36,
+
+"nPartitions": 1
+}

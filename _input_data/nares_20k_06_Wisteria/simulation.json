@@ -1,0 +1,24 @@
+{
+"ProjectName":"nares_20k_06_Wisteria",
+"ParentConfig": "/home/s2/Projects-CUDA/iceMPM_v5/_input_data/base_config.json",
+
+"ImageColor":"../nares_20k_06/color_06_20k.png",
+
+"PROJ_RESIZE_FACTOR": 1.0,
+
+"SimulationStartDate": "2024-06-06",
+
+"Snapshot": "f00000.h5",
+"LoadSnapshotForSpinUp":"f00000.h5",
+
+
+"InitialTimeStep": 0.0483945,
+
+"SaveAnimationAsJPG":true,
+"JPG_OffsetX":-1523,
+"JPG_OffsetY":675,
+"JPG_Crop_Width":20576,
+"JPG_Crop_Height":11574,
+
+"nPartitions": 1
+}

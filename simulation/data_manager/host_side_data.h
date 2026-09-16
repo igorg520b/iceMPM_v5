@@ -1,0 +1,103 @@
+// host_side_data.h
+
+#ifndef HOST_SIDE_DATA_H
+#define HOST_SIDE_DATA_H
+
+#include <array>
+#include <vector>
+#include <string>
+#include <string_view>
+#include <filesystem>
+#include <memory>
+
+#include <Eigen/Core>
+
+// Forward decl
+namespace H5 { class H5File; }
+
+#include "gui/colormap.h"
+#include "parameters_sim.h"
+#include "host_side_soa.h"
+#include "directory_manager.h"
+#include "currentinterpolator.h"
+#include "windinterpolator.h"
+#include "visualization_options.h"
+
+
+class HostSideData
+{
+public:
+    HostSideData();
+    ~HostSideData() = default;
+
+    SimParams prms;
+    DirectoryManager dirs;                    // where generated data (caches, grid.h5, snapshots, output) gets written -- see directory_manager.h
+    HostSideSOA hssoa;                        // host-side points
+    std::vector<std::vector<float>> host_grid_buffer;     // host-side grid: sparse allocation for visualization
+    CurrentInterpolator currentInterp;
+    WindInterpolator windInterp;
+
+    std::string SimulationTitle;
+    std::string data_directory;  // directory where grid.h5 and initial snapshot are located
+    std::string output_directory;  // directory where frames will be saved
+    std::string snapshot_directory; // directory where snapshots will be saved
+
+    // host-side simulation data
+    std::vector<uint8_t> landmask_buffer;       // land (0), modeled area (255), cropped region only
+    std::vector<uint8_t> analysis_mask_buffer;  // region diagnostics mask: 1=included, 0=excluded, cropped region only. Empty if no AnalysisRegionMask was configured.
+    std::vector<uint8_t> original_image_colors_rgb;     // 3-component original image for background coloring (full image)
+    std::vector<float> tmp_halo_buffer;        // temporary buffer for GPU halo communication (during rendering)
+//    std::array<double, 2*SimParams::MAX_REGIONS> grid_forces_summary_per_region;
+
+    std::vector<uint8_t> frame_rgba; // for loading/visualization (RGBA 4 bytes)
+
+    // Memory tracking: [0]=grid bytes, [1]=points bytes
+    size_t allocated_bytes[2] = {0, 0};
+
+    void AllocateGridArrays(bool allocate_dense_grid = true);
+    void AllocateGridArray(int arrayIndex); // Allocate specific array if not present
+    bool IsGridArrayAllocated(int arrayIndex) const; // Check status
+
+    void LoadGridDataFromFile(const std::string& gridFilePath);
+
+    void FillModelledAreaWithBlueColor();
+
+    void ReadPointsFromSnapshot(std::string fileNameSnapshotHDF5);
+    void VerifyPoints();
+    void SaveSnapshot(int SimulationStep, double SimulationTime, bool compress, const std::string& output_directory = "", const std::string& prefix = "f", int force_frame_index = -1);
+    void SaveFrame(const int SimulationStep, const double SimulationTime, bool compress, int compression_level);
+
+    // Helper to get raw pointer to specific grid array (returns nullptr if grid not allocated)
+    float* GetGridBufferPointer(int arrayIndex);
+
+    void RenderGridRaster(const VisOpt::Type visOpt, std::vector<uint8_t>& renderedImage, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1);
+    void RenderAsJPG(int frameIndex, const VisOpt::Type visOpt, int offsetX, int offsetY, int sizeX, int sizeY, std::string outPrefix = "raster", int finalW = 1920, int finalH = 1080);
+
+    void generate_ffmpeg_script(int frameFrom, int frameTo, const std::string& dirName, const std::string& currentFrameDirectory, const std::vector<VisOpt::Type>& visOptsToRender);
+
+    // Reusable buffers for saving (allocated once to avoid reallocation)
+    std::vector<float> save_buffer_float; 
+    std::vector<uint8_t> save_buffer_uint8; 
+
+    // Post-processor support: Load frame data from saved simulation output
+    void LoadFrameData(int frameIndex, const std::string& framesDirectory);
+
+    // Appends one row to <data_directory>/average_ice_temperature.csv (writing
+    // the header first if the file doesn't exist yet). Used by preparer's
+    // thermal spin-up (phase="spinup") and, at simulation runtime, by
+    // gplate/cplate's periodic ice-strength update (phase="simulation") --
+    // both write to the same file so the two phases form one continuous
+    // timeline.
+    void AppendAverageIceTemperature(long long epochTimestamp, double avgTempC,
+                                      unsigned sampleCount, const std::string& phase);
+
+private:
+    ColorMap colormap;
+
+    // Helper method for reading grid datasets from HDF5 files
+    static void readGridDataset(const H5::H5File& file, const std::string& dataset_name,
+                                std::vector<double>& dest_buffer, size_t offset);
+
+};
+
+#endif

@@ -1,0 +1,71 @@
+{
+"RuntimeDirectory": "/work/gm42/m42000/projects/_runtime",
+"UseDoubleGrid": true,
+
+"ImageFootprintMask": "../footprint_mask.png",
+"ImageLandMask": "../land_mask.png",
+"ImageIceMask": "../ice_mask_v2.png",
+"ImageThicknessMask": "../thickness_v1.png",
+"AnalysisRegionMask": "../analysis_mask.png",
+"GeneratePoints": true,
+
+"PointsPerCell": 5,
+"StdDevOfThickness": 0.3,
+"ThicknessFrom": 0.8,
+"ThicknessTo": 3.0,
+
+"tpb_P2G": 256,
+"tpb_Upd": 512,
+"tpb_G2P": 128,
+
+"YoungsModulus": 5.0e8,
+"PoissonsRatio": 0.3,
+"IceDensity": 920,
+
+"IceStrengthUpdatePeriod": 60.0,
+"UseLiveIceStrength": true,
+"IceStrengthFactor": 0.52,
+"IceStrengthFactorTensile": 0.40,
+"IceStrengthFactorCompressive": 2.0,
+"IceStrengthFactorCompressiveYield": 1.0,
+
+"IceFractureAngle":0,
+"IceYieldFrictionAngle": 0,
+"Cf": 0.9,
+"Cf_residual": 0.6,
+"GammaStar": 0.1,
+
+"IceShearStrength": 7.75e4,
+"IceTensileFailureStrength": 7e4,
+"TauInv": 0,
+"IceCompressiveThreshold": 5e5,
+"DP_phi": 57,
+"DP_threshold_p": -1000,
+
+"IceFrictionCoeff": 0.3,
+
+"SaveSnapshots": true,
+"SimulationEndTime": 1209600,
+"AnimationFramePeriod": 300,
+
+"IceSalinity": 6.0,
+
+"waterDragNormalized": 5.0e-3,
+"windDragNormalized": 1.4e-3,
+"ForcingSpinUpDuration": 3600.0,
+
+"GridData": "grid.h5",
+"SnapshotPeriod": 36,
+
+"PROJ_LAT_0": 80.0,
+"PROJ_LON_0": -69.0,
+"PROJ_TRANSFORM_COEFFS": [49.86, 0.0, -392875.8347788442, 0.0, -49.85843583197958, 348669.83948254184],
+
+"PreSimulationStartDate": "2024-05-01",
+"SimulationEndDate": "2024-06-29",
+
+"CARRA1Data": ["/work/gm42/m42000/projects/_netcdf/carra1_202405.nc", "/work/gm42/m42000/projects/_netcdf/carra1_202406.nc"],
+"GLO12Data": "/work/gm42/m42000/projects/_netcdf/glo12v4_kane_basin_currents.nc",
+"GLO12Tides": "/work/gm42/m42000/projects/_netcdf/glo12v4_kane_basin_tidal_currents.nc",
+"GLO12ThicknessData": "/work/gm42/m42000/projects/_netcdf/glo12v4_kane_basin_ice_thickness.nc"
+}

@@ -1,0 +1,74 @@
+CLAUDE.md
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python virtual environments
+_python_code/.venv/
+
+# JetBrains IDE project files
+_python_code/.idea/
+
+# Downloaded/generated satellite imagery (large bulk files)
+_python_code/image_download/nares_tiles/
+_python_code/image_download/nares_kane_basin_stereo/
+_python_code/pq_calibration/hexbin_envelope/
+
+# NetCDF data files (large bulk files)
+*.nc
+
+# Background/color composite images for the higher-res nares_* setups are large
+# bulk files, kept out of version control (glob so this survives directory
+# renames like nares_20k -> nares_20k_06; nares_2k/nares_2k_* stay tracked
+# since those color images are small).
+_input_data/nares_20k*/color_*.png
+_input_data/nares_2018_10k/color_2018_10k.png
+_input_data/nares_2025_10k/color_2025_10k.png
+
+CMakeLists.txt.user
+build/
+_slides/
+_report/
+_paper/
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# clangd index/cache (local, machine-specific)
+.cache/
+
+# Large generated graticule-frame raster (default add_graticule_frame.py output,
+# 100+ MB at full resolution -- exceeds GitHub's file size limit, regenerate locally
+# instead of tracking)
+_python_code/graticule/nares_intro_graticule.png

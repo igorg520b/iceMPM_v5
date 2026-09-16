@@ -1,0 +1,167 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Ice Yield Surface (p-q space): Current vs. Smooth Candidates", "Title"],
+
+Cell["\<\
+Compares two yield surfaces for fractured/crushed ice in (p, q) \
+stress-invariant space:
+1. Current: min of the elliptic cap and the Drucker-Prager line \
+(Q_From_Yield_Surcace in kernels.cu).
+2. Ellipse and DP line blended via a smooth-min with a tunable exponent \
+(\"flipped exponent\", a reciprocal power mean), which coincides with the \
+current DP line near the threshold and saturates toward the ellipse for \
+larger p, converging to the exact current curve as the exponent grows.
+
+The flipped-exponent candidate is plotted with its full formula written \
+directly in the Plot call. Everything below is static plots -- edit the \
+numbers in the Input cells directly and re-evaluate to try different \
+values.\
+\>", "Text"],
+
+Cell[CellGroupData[{
+Cell["Parameters (from _input_data/nares_7k/simulation.json)", "Section"],
+
+Cell["\<\
+All nares_*k configs currently share these values. UseLiveIceStrength is \
+true at runtime, so the real per-point fractured-shear-strength ceiling \
+is the dynamic idx_xi * IceShearStrengthFracturedRatio, not a fixed \
+constant -- IceShearStrengthFractured (the flat fallback constant) is \
+used below purely as a representative qmax for visualizing the SHAPE of \
+the surface.\
+\>", "Text"],
+
+Cell["\<\
+pminVal = -3.5*10^5;          (* -IceTensileStrength *)
+pmaxVal = 100*10^6;           (* IceCompressiveStrength *)
+dpThresholdVal = -1.0*10^3;   (* DP_threshold_p *)
+dpPhiVal = 55;                (* DP_phi, degrees *)
+qmaxFracturedVal = 4.5*10^5;  (* IceShearStrengthFractured, flat stand-in *)\
+\>", "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell["Yield-Surface Definitions", "Section"],
+
+Cell["\<\
+qEllipse[p_, pmin_, pmax_, qmax_] := 2 Sqrt[Max[0, (pmax - p) (p - pmin)]] qmax/(pmax - pmin)
+
+qDP[p_, threshold_, phiDeg_] := Max[0, (p - threshold) Tan[phiDeg Degree]]
+
+(* Candidate 1: what we currently run -- exact port of Q_From_Yield_Surcace in kernels.cu *)
+qCurrent[p_, pmin_, pmax_, qmax_, threshold_, phiDeg_] := If[p > pmax || p < threshold, 0, Min[qEllipse[p, pmin, pmax, qmax], qDP[p, threshold, phiDeg]]]\
+\>", "Input"],
+
+Cell["\<\
+Alternative -- smooth-min via \"flipped exponent\" (reciprocal power \
+mean): SoftMin[a, b; n] = (a^-n + b^-n)^(-1/n) = a b/(a^n + b^n)^(1/n). \
+As n -> Infinity this reduces exactly to Min[a, b], today's hard corner. \
+Near p = threshold, qDP -> 0 while qEllipse stays finite, so the \
+softmin automatically tracks qDP -- same value and slope as the \
+current DP line, with no forcing needed. Past the crossover point qDP \
+exceeds qEllipse and the softmin saturates toward qEllipse instead of \
+growing without bound.\
+\>", "Text"],
+
+Cell["\<\
+qFlippedExponent[p_, pmin_, pmax_, qmax_, threshold_, phiDeg_, nExp_] := Module[{a, b}, a = qEllipse[p, pmin, pmax, qmax]; b = qDP[p, threshold, phiDeg]; If[p > pmax || p < threshold, 0, If[a == 0 && b == 0, 0, a b/(a^nExp + b^nExp)^(1/nExp)]]]\
+\>", "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell["Flipped-Exponent Candidate", "Section"],
+
+Cell["\<\
+Own plot, current surface shown for reference. The full soft-min \
+expression a b/(a^n + b^n)^(1/n) is written out directly in the Plot \
+call below (a = qEllipse[p, ...], b = qDP[p, ...]) rather than going \
+through the qFlippedExponent[...] helper -- edit the n -> 5 below \
+directly to try other steepness values.\
+\>", "Text"],
+
+Cell["\<\
+Plot[
+  {qCurrent[p, pminVal, pmaxVal, qmaxFracturedVal, dpThresholdVal, dpPhiVal],
+   With[{a = qEllipse[p, pminVal, pmaxVal, qmaxFracturedVal],
+         b = qDP[p, dpThresholdVal, dpPhiVal], n = 5},
+     a b/(a^n + b^n)^(1/n)]},
+  {p, -100000, 400000},
+  PlotRange -> {{-100000, 400000}, {0, 70000}},
+  PlotLegends -> {\"Current (hard min)\", \"Flipped-exponent soft-min, n = 5\"},
+  PlotStyle -> {Directive[Black, Thick], Directive[RGBColor[0.85, 0.2, 0.2], Thick]},
+  Frame -> True, FrameLabel -> {\"p  (Pa)\", \"q  (Pa)\"},
+  ImageSize -> 650, PlotPoints -> 200]\
+\>", "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell["Flipped-Exponent Multiplier Alone (Without the Ellipse)", "Section"],
+
+Cell["\<\
+a b/(a^n + b^n)^(1/n) factors as qEllipse(p) * M(p), where M(p) = \
+b/(a^n + b^n)^(1/n) is the multiplier actually applied to the ellipse. \
+Plotted alone below (NOT multiplied by the ellipse), so its bare shape \
+is visible on its own axis (0 to ~1, dimensionless) rather than in \
+stress units. Note M(p) depends on the actual shapes of qEllipse(p) \
+and qDP(p) both (not just a fixed function of p alone), so it is not a \
+plain, universal S-curve.\
+\>", "Text"],
+
+Cell["\<\
+Plot[
+  With[{a = qEllipse[p, pminVal, pmaxVal, qmaxFracturedVal],
+        b = qDP[p, dpThresholdVal, dpPhiVal], n = 5},
+    b/(a^n + b^n)^(1/n)],
+  {p, -100000, 400000},
+  PlotRange -> {{-100000, 400000}, {0, 1.1}},
+  PlotStyle -> Directive[RGBColor[0.85, 0.2, 0.2], Thick],
+  Frame -> True, FrameLabel -> {\"p  (Pa)\", \"multiplier M(p)\"},
+  PlotLabel -> \"Flipped-exponent multiplier alone, n = 5\",
+  ImageSize -> 650, PlotPoints -> 200]\
+\>", "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell["Full-Domain Context", "Section"],
+
+Cell["\<\
+The interesting transition region above is a tiny sliver of the full \
+domain -- IceCompressiveStrength (100 MPa) is far larger than any \
+pressure the yield surface actually needs to resolve interestingly, so \
+the ellipse's true peak sits far off to the right.
+
+No qCurrent/qEllipse/qDP calls below -- the whole expression is spelled \
+out directly: the elliptic-cap term (2*Sqrt[(pmax-p)(p-pmin)]*qmax/ \
+(pmax-pmin) -- what gets multiplied by qmax) and the DP-line term \
+(Max[0, (p-threshold)*Tan[phi]]), combined with Min[...] and clamped to \
+0 outside [DP_threshold_p, pmax] -- an exact, self-contained port of \
+Q_From_Yield_Surcace in kernels.cu.\
+\>", "Text"],
+
+Cell["\<\
+Plot[
+  If[p > pmaxVal || p < dpThresholdVal, 0,
+    Min[
+      2 Sqrt[Max[0, (pmaxVal - p) (p - pminVal)]] qmaxFracturedVal/(pmaxVal - pminVal),
+      Max[0, (p - dpThresholdVal) Tan[dpPhiVal Degree]]
+    ]
+  ],
+  {p, pminVal, pmaxVal},
+  Frame -> True, FrameLabel -> {\"p  (Pa)\", \"q  (Pa)\"},
+  PlotLabel -> \"Current yield surface over its full domain (context)\",
+  ImageSize -> 650]\
+\>", "Input"]
+}, Open  ]]
+
+}, Open  ]]
+},
+WindowSize->{1385.25, 759},
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)

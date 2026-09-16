@@ -1,0 +1,19 @@
+{
+"ProjectName":"nares_2018_10k",
+"ParentConfig": "/home/s2/Projects-CUDA/iceMPM_v5/_input_data/base_config_2018.json",
+
+"ImageColor":"color_2018_10k.png",
+"ImageIceMask":"ice_mask.png",
+"ImageThicknessMask":"thickness.png",
+
+"PROJ_RESIZE_FACTOR": 2.0,
+
+"SimulationStartDate": "2018-05-27T00:00:00",
+
+"Snapshot": "f00000.h5",
+
+"InitialTimeStep": 0.096789,
+"SnapshotPeriod": 36,
+
+"nPartitions": 1
+}

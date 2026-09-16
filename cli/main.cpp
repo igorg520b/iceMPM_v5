@@ -1,0 +1,92 @@
+#include <iostream>
+#include <functional>
+#include <string>
+#include <filesystem>
+#include <atomic>
+#include <thread>
+#include <chrono>
+#include <omp.h>
+
+#include <cxxopts.hpp>
+#include "model.h"
+#include "visualization_options.h"
+
+namespace fs = std::filesystem;
+
+
+int main(int argc, char** argv)
+{
+    std::cout << "num_threads " << omp_get_max_threads() << std::endl;
+    std::cout << "testing threads" << std::endl;
+    int nthreads, tid;
+#pragma omp parallel
+    { std::cout << omp_get_thread_num(); }
+    std::cout << std::endl;
+
+    // parse options
+    std::string parameter_filename;
+
+    cxxopts::Options options("Ice MPM", "CLI version of MPM simulation");
+    options.add_options()
+        // Define options and link them to variables
+        ("parameter", "Parameter file (JSON, required)", cxxopts::value<std::string>(parameter_filename))
+        ("g,generate-points", "Generate initial points and exit")
+        ("s,snapshot-only", "Generate initial snapshot and exit");
+
+    // Mark 'parameter' as the positional argument
+    options.parse_positional({"parameter"});
+    auto result = options.parse(argc, argv); // Parse arguments
+
+    // Check if required parameter file was provided
+    if (!result.count("parameter")) {
+        LOGR("Error: Parameter file argument is required."); // Minimal error output
+        throw std::runtime_error("Parameter file is required."); // Still need to signal failure
+    }
+
+    // Check if the provided path is a directory
+    if (fs::is_directory(parameter_filename)) {
+        // If it's a directory, append default filename "simulation.json"
+        parameter_filename = (fs::path(parameter_filename) / "simulation.json").string();
+    }
+
+    // cplate never constructs a VisualRepresentation (that's what populates
+    // VisOpt's inline-static arrays in the GUI targets), so without this,
+    // VisOpt::transparency_coeffs/range_from/range_to stay at their raw
+    // zero-initialized values -- silently disabling things like the
+    // tension/shear darkening in RenderAsJPG's grid_fracture_type output
+    // (see SaveAnimationAsJPG). No Qt/VTK dependency here -- see
+    // gui/vtk/visualization_options.h/.cpp.
+    VisOpt::LoadVisualizationState();
+
+    Model model;
+
+    if (result.count("generate-points"))
+    {
+        LOGR("Only generating points");
+        model.LoadParameterFile(parameter_filename);
+        return 0; // Exit successfully as requested
+    }
+
+
+    model.LoadParameterFile(parameter_filename);
+
+    if(result.count("snapshot-only"))
+    {
+        LOGR("Generating initial snapshot and exiting");
+        return 0;
+    }
+
+
+    model.prms.Printout();
+    model.Prepare();
+
+    bool step_result;
+    do
+    {
+        step_result = model.Step();
+    } while(step_result);
+
+    model.gpu.synchronize();
+    std::cout << "cm done\n";
+    return 0;
+}

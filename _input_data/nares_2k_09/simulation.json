@@ -1,0 +1,38 @@
+{
+"ProjectName":"nares_2k_09",
+"ParentConfig": "/home/s2/Projects-CUDA/iceMPM_v5/_input_data/base_config.json",
+"ImageColor":"../nares_2k/color_06_2k.png",
+
+"PROJ_RESIZE_FACTOR": 10.0,
+
+"SimulationStartDate": "2024-06-09T12:00:00",
+
+"Snapshot": "f00000.h5",
+
+"IceStrengthFactor": 0.48,
+"IceStrengthFactorTensile": 0.40,
+"IceStrengthFactorCompressive": 1.3,
+"IceStrengthFactorCompressiveYield": 0.9, 
+
+
+"TauInv": 0.25,
+"IceFractureAngle":10,
+"IceYieldFrictionAngle": 10,
+"Cf": 0.8,
+"Cf_residual": 0.1,
+"GammaStar": 0.2,
+"DP_phi": 57,
+"DP_threshold_p": -1000,
+"IceFrictionCoeff": 0.05,
+
+"SnapshotPeriod": 36,
+"InitialTimeStep": 0.483945,
+
+"SaveAnimationAsJPG":false,
+"JPG_OffsetX":-92,
+"JPG_OffsetY":102,
+"JPG_Crop_Width":1936,
+"JPG_Crop_Height":1089,
+
+"nPartitions": 1
+}

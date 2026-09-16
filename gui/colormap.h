@@ -1,0 +1,46 @@
+#ifndef COLORMAP_H
+#define COLORMAP_H
+
+#include <iostream>
+#include <array>
+#include <vector>
+#include <Eigen/Dense>
+#include <cstdint>
+#include <algorithm>
+
+class ColorMap {
+public:
+    // Fast enum-based colormap selection
+    enum class Palette { P2, Pressure, ANSYS, Pastel, NCD, Ice, COUNT};
+
+private:
+    // Store colormaps using std::vector for variable sizes
+    static const std::array<std::vector<Eigen::Vector3f>, static_cast<size_t>(Palette::COUNT)> colormaps;
+
+public:
+
+    // Get interpolated color as Eigen::Vector3f (values in range [0,1])
+    static Eigen::Vector3f interpolateColor(Palette palette, float value);
+
+    // Get interpolated color as uint8_t[3] (values in range [0,255])
+    static std::array<uint8_t, 3> getColor(Palette palette, float value);
+
+    // Get full color table for a given palette
+    static const std::vector<Eigen::Vector3f>& getColorTable(Palette palette);
+
+    static std::array<uint8_t, 3> mergeColors(uint32_t rgb, const std::array<uint8_t, 3>& colorArray, float alpha);
+    static std::array<uint8_t, 3> mergeColors(const std::array<uint8_t, 3>& colorArray1,
+                                              const std::array<uint8_t, 3>& colorArray2, float alpha);
+
+
+    inline static constexpr std::array<uint8_t, 3> rgb_water = {0x15, 0x1f, 0x2f};
+    inline static constexpr std::array<uint8_t, 3> rgb_crushed_overlay = {50, 50, 50};  // Dark grey for crushed regions
+    inline static constexpr std::array<uint8_t, 3> rgb_red = {255, 0, 0};  // Red for damage visualization
+    inline static constexpr std::array<uint8_t, 3> rgb_green = {0, 128, 0};
+    inline static constexpr std::array<uint8_t, 3> rgb_white = {255, 255, 255};
+    inline static constexpr std::array<uint8_t, 3> rgb_land = {0xda, 0x8d, 0x25};            // grid_schematic land
+    inline static constexpr std::array<uint8_t, 3> rgb_open_boundary = {0x81, 0xc7, 0x7f};   // grid_schematic open boundary
+};
+
+
+#endif // COLORMAP_H
